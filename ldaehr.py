@@ -67,7 +67,7 @@ def update_dir_prior(prior, N, logphat, rho):
 
 
 class LdaEHRState(utils.SaveLoad):
-    """Encapsulate information for distributed computation of :class:`~gensim.models.ldamodel.LdaModel` objects.
+    """Encapsulate information for distributed computation of 
 
     Objects of this class are sent over the network, so try to keep them lean to
     reduce traffic.
@@ -88,7 +88,6 @@ class LdaEHRState(utils.SaveLoad):
 
         """
         self.eta = np.empty(len(eta), dtype=object)
-    #    self.sstats = np.array([np.zeros(x, dtype=dtype) for x in shape_lst], dtype = object)
         self.sstats = np.empty(len(shape_lst), dtype=object)
         for i in range(len(shape_lst)):
             self.sstats[i] = np.zeros(shape_lst[i], dtype=dtype)
@@ -111,7 +110,7 @@ class LdaEHRState(utils.SaveLoad):
 
         Parameters
         ----------
-        other : :class:`~gensim.models.ldamodel.LdaEHRState`
+        other : :class:`~LdaEHRState`
             The state object with which the current one will be merged.
 
         """
@@ -131,7 +130,7 @@ class LdaEHRState(utils.SaveLoad):
         rhot : float
             Weight of the `other` state in the computed average. A value of 0.0 means that `other`
             is completely ignored. A value of 1.0 means `self` is completely ignored.
-        other : :class:`~gensim.models.ldamodel.LdaEHRState`
+        other : :class:`~LdaEHRState`
             The state object with which the current one will be merged.
         targetsize : int, optional
             The number of documents to stretch both states to.
@@ -162,14 +161,14 @@ class LdaEHRState(utils.SaveLoad):
     def blend2(self, rhot, other, targetsize=None):
         """Merge the current state with another one using a weighted sum for the sufficient statistics.
 
-        In contrast to :meth:`~gensim.models.ldamodel.LdaEHRState.blend`, the sufficient statistics are not scaled
+        In contrast to :meth:`~LdaEHRState.blend`, the sufficient statistics are not scaled
         prior to aggregation.
 
         Parameters
         ----------
         rhot : float
             Unused.
-        other : :class:`~gensim.models.ldamodel.LdaEHRState`
+        other : :class:`~LdaEHRState`
             The state object with which the current one will be merged.
         targetsize : int, optional
             The number of documents to stretch both states to.
@@ -226,7 +225,7 @@ class LdaEHRState(utils.SaveLoad):
 
         Returns
         -------
-        :class:`~gensim.models.ldamodel.LdaEHRState`
+        :class:`~LdaEHRState`
             The state loaded from the given file.
 
         """
@@ -710,7 +709,7 @@ class LdaEHR(interfaces.TransformationABC, basemodel.BaseTopicModel):
         ----------
         chunk : list of list of (int, float)
             The corpus chunk on which the inference step will be performed.
-        state : :class:`~gensim.models.ldamodel.LdaEHRState`, optional
+        state : :class:`~LdaEHRState`, optional
             The state to be updated with the newly accumulated sufficient statistics. If none, the models
             `self.state` is updated.
 
@@ -1032,7 +1031,7 @@ class LdaEHR(interfaces.TransformationABC, basemodel.BaseTopicModel):
         ----------
         rho : float
             Learning rate.
-        other : :class:`~gensim.models.ldamodel.LdaEHR`
+        other : :class:`~LdaEHR`
             The model whose sufficient statistics will be used to update the topics.
         extra_pass : bool, optional
             Whether this step required an additional pass over the corpus.
@@ -1194,7 +1193,7 @@ class LdaEHR(interfaces.TransformationABC, basemodel.BaseTopicModel):
 
     def show_topic(self, topicid, topn=10):
         """Get the representation for a single topic. Words here are the actual strings, in constrast to
-        :meth:`~gensim.models.ldamodel.LdaModel.get_topic_terms` that represents words by their vocabulary ID.
+        :meth:`~LdaModel.get_topic_terms` that represents words by their vocabulary ID.
 
         Parameters
         ----------
@@ -1249,61 +1248,6 @@ class LdaEHR(interfaces.TransformationABC, basemodel.BaseTopicModel):
             bestn = matutils.argsort(topic, topn, reverse=True)
             res.append([(idx, topic[idx]) for idx in bestn])
         return res
-
-    # def top_topics(self, corpus=None, texts=None, dictionary=None, window_size=None,
-    #                coherence='u_mass', topn=20, processes=-1):
-    #     """Get the topics with the highest coherence score the coherence for each topic.
-
-    #     Parameters
-    #     ----------
-    #     corpus : iterable of list of (int, float), optional
-    #         Corpus in BoW format.
-    #     texts : list of list of str, optional
-    #         Tokenized texts, needed for coherence models that use sliding window based (i.e. coherence=`c_something`)
-    #         probability estimator .
-    #     dictionary : :class:`~gensim.corpora.dictionary.Dictionary`, optional
-    #         Gensim dictionary mapping of id word to create corpus.
-    #         If `model.id2word` is present, this is not needed. If both are provided, passed `dictionary` will be used.
-    #     window_size : int, optional
-    #         Is the size of the window to be used for coherence measures using boolean sliding window as their
-    #         probability estimator. For 'u_mass' this doesn't matter.
-    #         If None - the default window sizes are used which are: 'c_v' - 110, 'c_uci' - 10, 'c_npmi' - 10.
-    #     coherence : {'u_mass', 'c_v', 'c_uci', 'c_npmi'}, optional
-    #         Coherence measure to be used.
-    #         Fastest method - 'u_mass', 'c_uci' also known as `c_pmi`.
-    #         For 'u_mass' corpus should be provided, if texts is provided, it will be converted to corpus
-    #         using the dictionary. For 'c_v', 'c_uci' and 'c_npmi' `texts` should be provided (`corpus` isn't needed)
-    #     topn : int, optional
-    #         Integer corresponding to the number of top words to be extracted from each topic.
-    #     processes : int, optional
-    #         Number of processes to use for probability estimation phase, any value less than 1 will be interpreted as
-    #         num_cpus - 1.
-
-    #     Returns
-    #     -------
-    #     list of (list of (int, str), float)
-    #         Each element in the list is a pair of a topic representation and its coherence score. Topic representations
-    #         are distributions of words, represented as a list of pairs of word IDs and their probabilities.
-
-    #     """
-    #     cm = CoherenceModel(
-    #         model=self, corpus=corpus, texts=texts, dictionary=dictionary,
-    #         window_size=window_size, coherence=coherence, topn=topn,
-    #         processes=processes
-    #     )
-    #     coherence_scores = cm.get_coherence_per_topic()
-
-    #     str_topics = []
-    #     for topic in self.get_topics():  # topic = array of vocab_size floats, one per term
-    #         bestn = matutils.argsort(
-    #             topic, topn=topn, reverse=True)  # top terms for topic
-    #         beststr = [(topic[_id], self.id2word[_id])
-    #                    for _id in bestn]  # membership, token
-    #         # list of topn (float membership, token) tuples
-    #         str_topics.append(beststr)
-
-    #     scored_topics = zip(str_topics, coherence_scores)
-    #     return sorted(scored_topics, key=lambda tup: tup[1], reverse=True)
 
     def get_document_topics(self, bow, minimum_probability=None, minimum_phi_value=None,
                             per_word_topics=False):
@@ -1428,121 +1372,6 @@ class LdaEHR(interfaces.TransformationABC, basemodel.BaseTopicModel):
 
         return values
 
-    # def diff(self, other, distance="kullback_leibler", num_words=100,
-    #          n_ann_terms=10, diagonal=False, annotation=True, normed=True):
-    #     """Calculate the difference in topic distributions between two models: `self` and `other`.
-
-    #     Parameters
-    #     ----------
-    #     other : :class:`~gensim.models.ldamodel.LdaEHR`
-    #         The model which will be compared against the current object.
-    #     distance : {'kullback_leibler', 'hellinger', 'jaccard', 'jensen_shannon'}
-    #         The distance metric to calculate the difference with.
-    #     num_words : int, optional
-    #         The number of most relevant words used if `distance == 'jaccard'`. Also used for annotating topics.
-    #     n_ann_terms : int, optional
-    #         Max number of words in intersection/symmetric difference between topics. Used for annotation.
-    #     diagonal : bool, optional
-    #         Whether we need the difference between identical topics (the diagonal of the difference matrix).
-    #     annotation : bool, optional
-    #         Whether the intersection or difference of words between two topics should be returned.
-    #     normed : bool, optional
-    #         Whether the matrix should be normalized or not.
-
-    #     Returns
-    #     -------
-    #     numpy.ndarray
-    #         A difference matrix. Each element corresponds to the difference between the two topics,
-    #         shape (`self.num_topics`, `other.num_topics`)
-    #     numpy.ndarray, optional
-    #         Annotation matrix where for each pair we include the word from the intersection of the two topics,
-    #         and the word from the symmetric difference of the two topics. Only included if `annotation == True`.
-    #         Shape (`self.num_topics`, `other_model.num_topics`, 2).
-
-    #     Examples
-    #     --------
-    #     Get the differences between each pair of topics inferred by two models
-
-    #     .. sourcecode:: pycon
-
-    #         >>> from gensim.models.ldamulticore import LdaMulticore
-    #         >>> from gensim.test.utils import datapath
-    #         >>>
-    #         >>> m1 = LdaMulticore.load(datapath("lda_3_0_1_model"))
-    #         >>> m2 = LdaMulticore.load(datapath("ldamodel_python_3_5"))
-    #         >>> mdiff, annotation = m1.diff(m2)
-    #         >>> topic_diff = mdiff  # get matrix with difference for each topic pair from `m1` and `m2`
-
-    #     """
-    #     distances = {
-    #         "kullback_leibler": kullback_leibler,
-    #         "hellinger": hellinger,
-    #         "jaccard": jaccard_distance,
-    #         "jensen_shannon": jensen_shannon
-    #     }
-
-    #     if distance not in distances:
-    #         valid_keys = ", ".join("`{}`".format(x) for x in distances.keys())
-    #         raise ValueError(
-    #             "Incorrect distance, valid only {}".format(valid_keys))
-
-    #     if not isinstance(other, self.__class__):
-    #         raise ValueError(
-    #             "The parameter `other` must be of type `{}`".format(self.__name__))
-
-    #     distance_func = distances[distance]
-    #     d1, d2 = self.get_topics(), other.get_topics()
-    #     t1_size, t2_size = d1.shape[0], d2.shape[0]
-    #     annotation_terms = None
-
-    #     fst_topics = [{w for (w, _) in self.show_topic(
-    #         topic, topn=num_words)} for topic in range(t1_size)]
-    #     snd_topics = [{w for (w, _) in other.show_topic(
-    #         topic, topn=num_words)} for topic in range(t2_size)]
-
-    #     if distance == "jaccard":
-    #         d1, d2 = fst_topics, snd_topics
-
-    #     if diagonal:
-    #         assert t1_size == t2_size, \
-    #             "Both input models should have same no. of topics, " \
-    #             "as the diagonal will only be valid in a square matrix"
-    #         # initialize z and annotation array
-    #         z = np.zeros(t1_size)
-    #         if annotation:
-    #             annotation_terms = np.zeros(t1_size, dtype=list)
-    #     else:
-    #         # initialize z and annotation matrix
-    #         z = np.zeros((t1_size, t2_size))
-    #         if annotation:
-    #             annotation_terms = np.zeros((t1_size, t2_size), dtype=list)
-
-    #     # iterate over each cell in the initialized z and annotation
-    #     for topic in np.ndindex(z.shape):
-    #         topic1 = topic[0]
-    #         if diagonal:
-    #             topic2 = topic1
-    #         else:
-    #             topic2 = topic[1]
-
-    #         z[topic] = distance_func(d1[topic1], d2[topic2])
-    #         if annotation:
-    #             pos_tokens = fst_topics[topic1] & snd_topics[topic2]
-    #             neg_tokens = fst_topics[topic1].symmetric_difference(
-    #                 snd_topics[topic2])
-
-    #             pos_tokens = list(pos_tokens)[:min(
-    #                 len(pos_tokens), n_ann_terms)]
-    #             neg_tokens = list(neg_tokens)[:min(
-    #                 len(neg_tokens), n_ann_terms)]
-
-    #             annotation_terms[topic] = [pos_tokens, neg_tokens]
-
-    #     if normed:
-    #         if np.abs(np.max(z)) > 1e-8:
-    #             z /= np.max(z)
-
-    #     return z, annotation_terms
 
     def __getitem__(self, bow, eps=None):
         """Get the topic distribution for the given document.
@@ -1653,74 +1482,5 @@ class LdaEHR(interfaces.TransformationABC, basemodel.BaseTopicModel):
         super(LdaEHR, self).save(fname, ignore=ignore,
                                  separately=separately, *args, **kwargs)
 
-    @classmethod
-    def load(cls, fname, *args, **kwargs):
-        # TODO: need to modify gensim.utils.SaveLoad.load to make it work
-        # can use pickle directly to save/load the model right now
-        """Load a previously saved :class:`gensim.models.ldamodel.LdaEHR` from file.
 
-        See Also
-        --------
-        :meth:`~gensim.models.ldamodel.LdaEHR.save`
-            Save model.
-
-        Parameters
-        ----------
-        fname : str
-            Path to the file where the model is stored.
-        *args
-            Positional arguments propagated to :meth:`~gensim.utils.SaveLoad.load`.
-        **kwargs
-            Key word arguments propagated to :meth:`~gensim.utils.SaveLoad.load`.
-
-        Examples
-        --------
-        Large arrays can be memmap'ed back as read-only (shared memory) by setting `mmap='r'`:
-
-        .. sourcecode:: pycon
-
-            >>> from gensim.test.utils import datapath
-            >>>
-            >>> fname = datapath("lda_3_0_1_model")
-            >>> lda = LdaModel.load(fname, mmap='r')
-
-        """
-        kwargs['mmap'] = kwargs.get('mmap', None)
-        result = super(LdaEHR, cls).load(fname, *args, **kwargs)
-
-        # check if `random_state` attribute has been set after main pickle load
-        # if set -> the model to be loaded was saved using a >= 0.13.2 version of Gensim
-        # if not set -> the model to be loaded was saved using a < 0.13.2 version of Gensim,
-        # so set `random_state` as the default value
-        if not hasattr(result, 'random_state'):
-            # using default value `get_random_state(None)`
-            result.random_state = utils.get_random_state(None)
-            logging.warning("random_state not set so using default value")
-
-        # dtype could be absent in old models
-        if not hasattr(result, 'dtype'):
-            # float64 was implicitly used before (cause it's default in numpy)
-            result.dtype = np.float64
-            logging.info("dtype was not set in saved %s file %s, assuming np.float64",
-                         result.__class__.__name__, fname)
-
-        state_fname = utils.smart_extension(fname, '.state')
-        try:
-            result.state = LdaEHRState.load(state_fname, *args, **kwargs)
-        except Exception as e:
-            logging.warning("failed to load state from %s: %s", state_fname, e)
-
-        id2word_fname = utils.smart_extension(fname, '.id2word')
-        # check if `id2word_fname` file is present on disk
-        # if present -> the model to be loaded was saved using a >= 0.13.2 version of Gensim,
-        # so set `result.id2word` using the `id2word_fname` file
-        # if not present -> the model to be loaded was saved using a < 0.13.2 version of Gensim,
-        # so `result.id2word` already set after the main pickle load
-        if os.path.isfile(id2word_fname):
-            try:
-                result.id2word = utils.unpickle(id2word_fname)
-            except Exception as e:
-                logging.warning(
-                    "failed to load id2word dictionary from %s: %s", id2word_fname, e)
-        return result
 

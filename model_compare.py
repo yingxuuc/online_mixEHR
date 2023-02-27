@@ -1,3 +1,5 @@
+## The functions in this script helped to compare topics among different models. 
+
 from gensim.matutils import (
     kullback_leibler, hellinger, jaccard_distance, jensen_shannon,
     dirichlet_expectation, logsumexp, mean_absolute_difference,
@@ -18,7 +20,7 @@ def diff(m1, m2, distance="kullback_leibler", num_words=30,
 
         Parameters
         ----------
-        other : :class:`~gensim.models.ldamodel.LdaEHR`
+        other : :class:`~LdaEHR`
             The model which will be compared against the current object.
         distance : {'kullback_leibler', 'hellinger', 'jaccard', 'jensen_shannon'}
             The distance metric to calculate the difference with.
